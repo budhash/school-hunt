@@ -1,0 +1,38 @@
+_START=1
+_END=7
+_RAW=./raw
+_JQ=./jq
+
+function _main(){
+    #_download
+    _process
+    #_cleanup
+}
+
+function _download(){
+    for (( c=$_START; c<=$_END; c++ ))
+    do
+	    curl -s "https://www.greatschools.org/search/search.page?distance=15&gradeLevels%5B%5D=e&lat=37.3598283&locationLabel=Santa%20Clara%2C%20CA%2095051&locationType=zip&lon=-121.98143540000001&page=${c}&st%5B%5D=public_charter&st%5B%5D=public&state=CA&tableView=Equity&view=table" -H 'Upgrade-Insecure-Requests: 1' -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36' --compressed | grep 'gon.search' | awk -F'gon.search=' '{print $2}' | awk -F';' '{print $1}' | python -m json.tool > $_RAW/${c}.json
+        sleep 1
+    done
+}
+
+function _process(){
+    rm $_RAW/a-*.json
+    rm $_RAW/all.json
+
+    for (( c=$_START; c<=$_END; c++ ))
+    do
+       cat $_RAW/${c}.json | ./jq '.schools' > $_RAW/a-${c}.json
+    done   
+
+    ./jq -s '[.[][]]' $_RAW/a-*.json> all.json
+    cat all.json | ./jq .[].name 
+}
+
+function _cleanup(){
+    echo "cleanup"
+}
+
+_main $@
+exit 0
