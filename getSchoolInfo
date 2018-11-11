@@ -4,7 +4,7 @@ _RAW=./raw
 _JQ=./jq
 
 function _main(){
-    #_download
+    _download
     _process
     #_cleanup
 }
