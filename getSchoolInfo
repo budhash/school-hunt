@@ -27,7 +27,10 @@ function _process(){
     done   
 
     ./jq -s '[.[][]]' $_RAW/a-*.json> all.json
-    cat all.json | ./jq .[].name 
+    #cat all.json | ./jq .[].name 
+    #update this for csv
+    echo "name, district, grades, rating, level, grades" > schools.csv
+    cat all.json | ./jq -r '.[] | [.name, .districtName, .gradeLevels, .rating, .ratingScale, .gradeLevels] | @csv' >> schools.csv
 }
 
 function _cleanup(){
